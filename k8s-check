@@ -1,0 +1,50 @@
+#!/bin/bash
+cmd=$1
+addr="raftapp.dev-pds.svc.cluster.local"
+
+
+function del_node_2() {
+	echo "---- del node 2 ----"
+	curl -L http://$addr:2380/2 -XDELETE
+}
+function del_node_3() {
+	echo "---- del node 3 ----"
+	curl -L http://$addr:2380/3 -XDELETE
+}
+
+function add_key_value() {
+	local key=$1
+	local value=$2
+	curl -XPUT http://$addr:2380/$key -d "$value"
+	echo "---- add key: $key, value: $value ----"
+}
+
+function get_key() {
+	local key=$1
+	value=`curl -XGET http://$addr:2380/$key` 
+	echo "---- s3 => get key: $key, value: $value ----"
+}
+
+function del_key() {
+	local key=$1
+	value=`curl -XDELETE http://$addr:2380/$key`
+	echo "---- del key: $key ----"
+}
+
+case $cmd in
+	"d2")
+	del_node_2
+;;
+	"d3")
+	del_node_3
+;;
+	"add")
+	add_key_value $2 $3
+;;
+	"get")
+	get_key $2
+;;
+	*)
+	echo "no such command support"
+esac
+

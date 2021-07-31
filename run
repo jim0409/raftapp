@@ -35,20 +35,6 @@ function del_node_3() {
 }
 
 
-function resume_node1() {
-	echo "--- resume node 1 ---"
-	go run *.go --id 1
-}
-function resume_node2() {
-	echo "--- resume node 2 ---"
-	go run *.go --id 2
-}
-function resume_node3() {
-	echo "--- resume node 3 ---"
-	go run *.go --id 3
-}
-
-
 function add_key_value() {
 	local key=$1
 	local value=$2
@@ -73,15 +59,6 @@ function del_key() {
 }
 
 case $cmd in
-	"r1")
-	resume_node1
-;;
-	"r2")
-	resume_node2
-;;
-	"r3")
-	resume_node3
-;;
 	"s1")
 	start_node1
 ;;
@@ -91,26 +68,17 @@ case $cmd in
 	"s3")
 	start_node3
 ;;
-	"s4")
-	start_node4
-;;
 	"a2")
 	add_node_2
 ;;
 	"a3")
 	add_node_3
 ;;
-	"a4")
-	add_node_4
-;;
 	"d2")
 	del_node_2
 ;;
 	"d3")
 	del_node_3
-;;
-	"d4")
-	del_node_4
 ;;
 	"add")
 	add_key_value $2 $3
@@ -124,23 +92,3 @@ case $cmd in
 	*)
 	echo "no such command support"
 esac
-
-
-# # TODO: refactor above script ...
-# local_addr="127.0.0.1"
-# borad_addr="0.0.0.0"
-
-# ADDR=$local_addr
-
-# function start_node() {
-# 	local no=$1
-# 	echo "--- start node $no ---"
-# 	go run *.go --addr http://"$ADDR":"$no"2379 --port "$no"2380
-# }
-
-# function add_node() {
-# 	local no=$1
-# 	echo "--- add node $no ---"
-# 	curl -L http://"$ADDR":12380/"$no" -XPOST -d http://"$ADDR":"$no"2379
-# }
-

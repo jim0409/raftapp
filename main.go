@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"net"
 	"os"
 	"os/signal"
 	"raft-app/conf"
@@ -11,20 +13,44 @@ import (
 	"syscall"
 )
 
-/*
-1. start service with InitNodeConfig
-2. throw input variables ndoe_addr, node_port into mysql
-3. query mysql records, if records length is greater than 1, add join(true) flag
-4. else return `id` as the started node `id`
-*/
-
 var (
 	raftnode     *raft.RaftNode
 	path         = flag.String("config", "./conf/app.dev.ini", "config location")
 	checkcommit  = flag.Bool("version", false, "burry code for check version")
 	gitcommitnum string
 	defaultWT    = 5
+	localip      string
 )
+
+func declareIp() error {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return err
+	}
+	for _, i := range ifaces {
+		addrs, err := i.Addrs()
+		if err != nil {
+
+			return err
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP.To4()
+				if !ip.IsLoopback() && ip != nil {
+					localip = ip.String()
+					return nil
+				}
+			case *net.IPAddr:
+				ip = v.IP
+				log.Println("======== 2 ==========", ip)
+			}
+			// process IP address
+		}
+	}
+	return nil
+}
 
 func checkComimit() {
 	fmt.Println(gitcommitnum)
@@ -49,6 +75,14 @@ func Init() error {
 	opdb, err := db.NewDBConfiguration(cfg.DbUser, cfg.DbPassword, "mysql", cfg.DbName, cfg.DbPort, cfg.DbHost).NewDBConnection()
 	if err != nil {
 		return err
+	}
+
+	// 如果有指定的 PeerAddr 則使用指定，否則使用本地第一張網卡的ip
+	if cfg.PeerAddr == "" {
+		if err = declareIp(); err != nil {
+			return err
+		}
+		cfg.PeerAddr = fmt.Sprintf("http://%v:2379", localip)
 	}
 
 	if cfg.ID == 0 {
@@ -115,7 +149,6 @@ func main() {
 	gracefulShutdown()
 }
 
-// gracefulShutdown: handle the worker connection
 func gracefulShutdown() {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
