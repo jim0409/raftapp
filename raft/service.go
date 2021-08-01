@@ -35,7 +35,8 @@ func (r *RaftNode) RunRaftNode() {
 	}
 
 	// the key-value http handler will propose updates to raft
-	serveHttpKVAPI(kvs, r.kvport, r.confc, errorC)
+	// serveHttpKVAPI(kvs, r.kvport, r.confc, errorC)
+	InitKVAPI(kvs, r.kvport, r.confc, errorC)
 }
 
 func (r *RaftNode) Close() {
@@ -63,7 +64,7 @@ func InitRaftNode(id int, kvport int, clusters []string, join bool, leaderaddr s
 func (r *RaftNode) regist() {
 	peeradrr := r.clusters[len(r.clusters)-1]
 	body := strings.NewReader(peeradrr)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%v/%d", r.leaderaddr, r.id), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%v/node/%d", r.leaderaddr, r.id), body)
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +78,7 @@ func (r *RaftNode) regist() {
 }
 
 func (r *RaftNode) unregist() {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%v/%d", r.leaderaddr, r.id), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%v/node/%d", r.leaderaddr, r.id), nil)
 	if err != nil {
 		panic(err)
 	}

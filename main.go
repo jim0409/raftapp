@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"raft-app/conf"
 	"raft-app/db"
 	"raft-app/raft"
+	"raft-app/router"
 	"syscall"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -42,11 +46,7 @@ func declareIp() error {
 					localip = ip.String()
 					return nil
 				}
-			case *net.IPAddr:
-				ip = v.IP
-				log.Println("======== 2 ==========", ip)
 			}
-			// process IP address
 		}
 	}
 	return nil
@@ -127,6 +127,21 @@ func Init() error {
 	}
 
 	raftnode = raft.InitRaftNode(cfg.ID, cfg.HttpPort, clusters, join, cfg.LeaderAddr, cfg.WaitToClose)
+
+	route := gin.Default()
+	router.ApiRouter(route)
+
+	httpSrv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.HttpPort),
+		Handler: route,
+	}
+
+	go func() {
+		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Println(fmt.Sprintf("http listen : %v\n", err))
+			panic(err)
+		}
+	}()
 
 	return nil
 }

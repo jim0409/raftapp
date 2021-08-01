@@ -17,34 +17,34 @@ function start_node3() {
 
 function add_node_2() {
 	echo "---- add node 2 ----"
-	curl -L http://127.0.0.1:12380/2 -XPOST -d http://127.0.0.1:22379
+	curl -L http://127.0.0.1:12380/node/2 -XPOST -d http://127.0.0.1:22379
 }
 function add_node_3() {
 	echo "---- add node 3 ----"
-	curl -L http://127.0.0.1:12380/3 -XPOST -d http://127.0.0.1:32379
+	curl -L http://127.0.0.1:12380/node/3 -XPOST -d http://127.0.0.1:32379
 }
 
 
 function del_node_2() {
 	echo "---- del node 2 ----"
-	curl -L http://127.0.0.1:12380/2 -XDELETE
+	curl -L http://127.0.0.1:12380/node/2 -XDELETE
 }
 function del_node_3() {
 	echo "---- del node 3 ----"
-	curl -L http://127.0.0.1:12380/3 -XDELETE
+	curl -L http://127.0.0.1:12380/node/3 -XDELETE
 }
 
 
 function add_key_value() {
 	local key=$1
 	local value=$2
-	curl -XPUT http://127.0.0.1:12380/$key -d "$value"
+	curl -XPUT http://127.0.0.1:12380/key/$key -d "$value"
 	echo "---- add key: $key, value: $value ----"
 }
 
 function get_key() {
 	local key=$1
-	value=`curl -XGET http://127.0.0.1:12380/$key` 
+	value=`curl -XGET http://127.0.0.1:12380/key/$key` 
 	echo "---- s1 => get key: $key, value: $value ----"
 	value=`curl -XGET http://127.0.0.1:22380/$key` 
 	echo "---- s2 => get key: $key, value: $value ----"

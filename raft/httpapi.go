@@ -9,11 +9,6 @@ import (
 	"go.etcd.io/etcd/raft/v3/raftpb"
 )
 
-type httpKVAPI struct {
-	store       *kvstore
-	confChangeC chan<- raftpb.ConfChange
-}
-
 /*
 定義要做共識的 API
 1. PUT/key -d 'value'	: 增加一比 KeyValue map
@@ -57,7 +52,7 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.addNode(nodeId, string(url))
+		h.AddNode(nodeId, string(url))
 
 		// As above, optimistic that raft will apply the conf change
 		w.WriteHeader(http.StatusNoContent)
@@ -69,7 +64,7 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.delNode(nodeId)
+		h.DelNode(nodeId)
 
 		// As above, optimistic that raft will apply the conf change
 		w.WriteHeader(http.StatusNoContent)
@@ -108,21 +103,4 @@ func serveHttpKVAPI(kv *kvstore, port int, confChangeC chan<- raftpb.ConfChange,
 	}()
 
 	return handler
-}
-
-func (h *httpKVAPI) addNode(nodeId uint64, url string) {
-	cc := raftpb.ConfChange{
-		Type:    raftpb.ConfChangeAddNode,
-		NodeID:  nodeId,
-		Context: []byte(url),
-	}
-	h.confChangeC <- cc
-}
-
-func (h *httpKVAPI) delNode(nodeId uint64) {
-	cc := raftpb.ConfChange{
-		Type:   raftpb.ConfChangeRemoveNode,
-		NodeID: nodeId,
-	}
-	h.confChangeC <- cc
 }
