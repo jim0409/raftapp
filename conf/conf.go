@@ -38,13 +38,3 @@ func InitConfig(path string) (*Config, error) {
 	}
 	return Conf, nil
 }
-
-// func InitDB() (db.OPDB, error) {
-// 	mysqlAddr := "mysql"
-// 	mysqlPort := "3306"
-// 	mysqlOpDB := "raft"
-// 	mysqlUsr := "raft"
-// 	mysqUsrPwd := "raft"
-
-// 	return db.NewDBConfiguration(mysqlUsr, mysqUsrPwd, "mysql", mysqlOpDB, mysqlPort, mysqlAddr).NewDBConnection()
-// }
