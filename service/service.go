@@ -27,10 +27,12 @@ func PutKey(c *gin.Context) {
 	b, err := c.GetRawData()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 	err = json.Unmarshal(b, kv)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 
 	raft.RetrieveKVApi().Propose(kv.Key, kv.Value)
@@ -44,11 +46,13 @@ func AddNode(c *gin.Context) {
 	iid, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 
 	b, err := c.GetRawData()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 
 	raft.RetrieveKVApi().AddNode(uint64(iid), string(b))
@@ -61,6 +65,7 @@ func DelNode(c *gin.Context) {
 	iid, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 	raft.RetrieveKVApi().DelNode(uint64(iid))
 	c.JSON(http.StatusOK, "ok")
