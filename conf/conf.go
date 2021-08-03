@@ -1,6 +1,11 @@
 package conf
 
-import "github.com/go-ini/ini"
+import (
+	"os"
+	"strconv"
+
+	"github.com/go-ini/ini"
+)
 
 var Conf *Config
 
@@ -36,5 +41,12 @@ func InitConfig(path string) (*Config, error) {
 	if err := ini.MapTo(Conf, path); err != nil {
 		return nil, err
 	}
+
+	if v := os.Getenv("NODE_ID"); v != "" {
+		if id, err := strconv.Atoi(v); err == nil {
+			Conf.ID = id
+		}
+	}
+
 	return Conf, nil
 }
