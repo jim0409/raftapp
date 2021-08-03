@@ -36,19 +36,17 @@ function del_node_3() {
 
 
 function add_key_value() {
-	local key=$1
-	local value=$2
-	curl -XPUT http://127.0.0.1:12380/key/$key -d "$value"
-	echo "---- add key: $key, value: $value ----"
+	curl -XPUT http://127.0.0.1:12380/key -d '{"key": "jim", "value": "value"}'
+	echo "---- add key: jim, value: value ----"
 }
 
 function get_key() {
 	local key=$1
 	value=`curl -XGET http://127.0.0.1:12380/key/$key` 
 	echo "---- s1 => get key: $key, value: $value ----"
-	value=`curl -XGET http://127.0.0.1:22380/$key` 
+	value=`curl -XGET http://127.0.0.1:22380/key/$key` 
 	echo "---- s2 => get key: $key, value: $value ----"
-	value=`curl -XGET http://127.0.0.1:32380/$key` 
+	value=`curl -XGET http://127.0.0.1:32380/key/$key` 
 	echo "---- s3 => get key: $key, value: $value ----"
 }
 
@@ -81,7 +79,7 @@ case $cmd in
 	del_node_3
 ;;
 	"add")
-	add_key_value $2 $3
+	add_key_value
 ;;
 	"get")
 	get_key $2
