@@ -41,3 +41,14 @@ func TestInsertNodeTable(t *testing.T) {
 
 	fmt.Println(url)
 }
+
+func TestRetruntNodeInfo(t *testing.T) {
+	id := 1
+
+	node, err := db.ReturnNodeInfo(id)
+	// assert.Nil(t, err)
+	if node.ID == 0 {
+		assert.Nil(t, err)
+	}
+
+}

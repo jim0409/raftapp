@@ -5,20 +5,20 @@ RUN set -eux; \
         apk add --no-cache --virtual .build-deps gcc libc-dev git
 
 ENV GOPATH /go/
-ENV GO_WORKDIR $GOPATH/src/raft-app
+ENV GO_WORKDIR $GOPATH/src/raftapp
 ENV GO111MODULE=on
 
 WORKDIR $GO_WORKDIR
 ADD . $GO_WORKDIR
 # add commit num into binary for checking
-RUN go build -ldflags "-X main.gitcommitnum=`git log|head -1|awk '{print $2}'` -s -w" -o raft-app
+RUN go build -ldflags "-X main.gitcommitnum=`git log|head -1|awk '{print $2}'` -s -w" -o raftapp
 
 
 FROM alpine:3.13.5
 WORKDIR /app
-COPY --from=builder /go/src/raft-app/raft-app .
+COPY --from=builder /go/src/raftapp/raftapp .
 # add app.dev.ini into Dockerfile
 RUN mkdir conf
 COPY ./conf/app.dev.ini ./conf/
 
-CMD ./raft-app
+CMD ./raftapp

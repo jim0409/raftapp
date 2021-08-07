@@ -30,7 +30,6 @@ type commit struct {
 
 // A key-value stream backed by raft
 type raftNode struct {
-	urlHost     string
 	proposeC    <-chan string            // proposed messages (k,v)
 	confChangeC <-chan raftpb.ConfChange // proposed cluster config changes
 	commitC     chan<- *commit           // entries committed to log (k,v)

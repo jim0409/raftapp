@@ -13,13 +13,12 @@ function del_node_3() {
 }
 
 function add_key_value() {
-	curl -XPUT http://$addr:2380/key -d '{"key": $key, "value": $value}'
+	curl -XPUT http://$addr:2380/key -d '{"key": "jim", "value": "weng"}'
 	echo "---- add key: jim, value: value ----"
 }
 
 function get_key() {
-	local key=$1
-	value=`curl -XGET http://$addr:2380/key/$key` 
+	value=`curl -XGET http://$addr:2380/key/jim` 
 	echo "---- => get key: $key, value: $value ----"
 }
 
@@ -40,7 +39,7 @@ case $cmd in
 	add_key_value
 ;;
 	"get")
-	get_key $2
+	get_key
 ;;
 	*)
 	echo "no such command support"

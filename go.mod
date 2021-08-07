@@ -1,4 +1,4 @@
-module raft-app
+module raftapp
 
 go 1.16
 

@@ -10,6 +10,7 @@ type Node struct {
 
 type ImpNode interface {
 	InsertDbRecord(int, string) (int, error)
+	UpdateDbRecord(int, int, string) error
 	ReturnNodes() (*[]Node, error)
 	GetClusterIps() ([]string, error)
 
@@ -29,6 +30,13 @@ func (db *Operation) InsertDbRecord(port int, addr string) (int, error) {
 		Addr: addr,
 	}
 	return int(n.ID), db.DB.Table(nodeTable).Create(n).Error
+}
+
+func (db *Operation) UpdateDbRecord(id int, port int, addr string) error {
+	return db.DB.Debug().Table(nodeTable).Where(`id = ?`, id).Updates(&Node{
+		Port: port,
+		Addr: addr,
+	}).Error
 }
 
 func (db *Operation) ReturnNodeInfo(id int) (*Node, error) {

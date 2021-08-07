@@ -2,7 +2,7 @@ package router
 
 import (
 	"net/http"
-	"raft-app/service"
+	"raftapp/service"
 
 	"github.com/gin-gonic/gin"
 )
