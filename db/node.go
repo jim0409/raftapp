@@ -1,6 +1,6 @@
 package db
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
 type Node struct {
 	gorm.Model
@@ -11,11 +11,7 @@ type Node struct {
 type ImpNode interface {
 	InsertDbRecord(int, string) (int, error)
 	UpdateDbRecord(int, int, string) error
-	ReturnNodes() (*[]Node, error)
 	GetClusterIps() ([]string, error)
-
-	DeleteRecord(int) error
-
 	ReturnNodeInfo(int) (*Node, error)
 }
 
@@ -35,10 +31,19 @@ func (db *Operation) InsertDbRecord(port int, addr string) (int, error) {
 }
 
 func (db *Operation) UpdateDbRecord(id int, port int, addr string) error {
-	return db.DB.Debug().Table(nodeTable).Where(`id = ?`, id).Updates(&Node{
+	return db.DB.Table(nodeTable).Where(`id = ?`, id).Updates(&Node{
 		Port: port,
 		Addr: addr,
 	}).Error
+}
+
+func (db *Operation) GetClusterIps() ([]string, error) {
+	urls := []string{}
+	if err := db.DB.Table(nodeTable).Select(`addr`).Where(`deleted_at is NULL`).Order(`id`).Scan(&urls).Error; err != nil {
+		return nil, err
+	}
+
+	return urls, nil
 }
 
 func (db *Operation) ReturnNodeInfo(id int) (*Node, error) {
@@ -47,30 +52,4 @@ func (db *Operation) ReturnNodeInfo(id int) (*Node, error) {
 		return nil, err
 	}
 	return n, nil
-}
-
-func (db *Operation) ReturnNodes() (*[]Node, error) {
-	ns := &[]Node{}
-	if err := db.DB.Table(nodeTable).Select(`*`).Where(`deleted_at is NULL`).Order(`id`).Scan(ns).Error; err != nil {
-		return nil, err
-	}
-	return ns, nil
-}
-
-func (db *Operation) GetClusterIps() ([]string, error) {
-	urls := []string{}
-	ns, err := db.ReturnNodes()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, n := range *ns {
-		urls = append(urls, n.Addr)
-	}
-
-	return urls, nil
-}
-
-func (db *Operation) DeleteRecord(id int) error {
-	return db.DB.Where(`id = ?`, id).Delete(&Node{}).Error
 }
