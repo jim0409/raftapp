@@ -39,6 +39,15 @@ func (h *httpKVAPI) AddNode(nodeId uint64, url string) {
 	h.confChangeC <- cc
 }
 
+func (h *httpKVAPI) UpdateNode(nodeId uint64, url string) {
+	cc := raftpb.ConfChange{
+		Type:    raftpb.ConfChangeUpdateNode,
+		NodeID:  nodeId,
+		Context: []byte(url),
+	}
+	h.confChangeC <- cc
+}
+
 func (h *httpKVAPI) DelNode(nodeId uint64) {
 	cc := raftpb.ConfChange{
 		Type:   raftpb.ConfChangeRemoveNode,

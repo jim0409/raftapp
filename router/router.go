@@ -37,6 +37,7 @@ func ApiRouter(r *gin.Engine) {
 	n1 := authrized.Group("/node")
 	{
 		n1.POST("/:nd", service.AddNode)
+		n1.PUT("/:nd", service.UpdateNode)
 		n1.DELETE("/:nd", service.DelNode)
 	}
 }

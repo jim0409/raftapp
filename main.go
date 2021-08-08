@@ -58,6 +58,7 @@ func checkComimit() {
 
 func Init() error {
 	flag.Parse()
+	newNode := false
 
 	// if there is a needed to check git commit num ... print it out
 	if *checkcommit {
@@ -84,11 +85,21 @@ func Init() error {
 		cfg.PeerAddr = fmt.Sprintf("http://%v:2379", localip)
 	}
 
+	// if cfg.ID != 0 {
+	// 	node, err := opdb.ReturnNodeInfo(cfg.ID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if cfg.HttpPort != node.Port || cfg.PeerAddr != node.Addr {
+	// 	}
+	// }
+
 	if cfg.ID == 0 {
 		aid, err := opdb.InsertDbRecord(cfg.HttpPort, cfg.PeerAddr)
 		if err != nil {
 			return err
 		}
+		newNode = true
 		cfg.ID = aid
 
 	} else {
@@ -96,8 +107,22 @@ func Init() error {
 		if err != nil {
 			return err
 		}
-		cfg.HttpPort = node.Port
-		cfg.PeerAddr = node.Addr
+
+		if node.ID == 0 {
+			aid, err := opdb.InsertDbRecord(cfg.HttpPort, cfg.PeerAddr)
+			if err != nil {
+				return err
+			}
+			newNode = true
+			cfg.ID = aid
+		}
+
+		if cfg.HttpPort != node.Port || cfg.PeerAddr != node.Addr {
+			err := opdb.UpdateDbRecord(cfg.ID, cfg.HttpPort, cfg.PeerAddr)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if cfg.HttpPort == 0 {
@@ -121,7 +146,7 @@ func Init() error {
 		return err
 	}
 
-	raftnode = raft.InitRaftNode(cfg.ID, cfg.HttpPort, clusters, cfg.LeaderAddr, cfg.WaitToClose)
+	raftnode = raft.InitRaftNode(cfg.ID, cfg.HttpPort, clusters, cfg.LeaderAddr, cfg.WaitToClose, newNode)
 
 	route := gin.Default()
 	router.ApiRouter(route)

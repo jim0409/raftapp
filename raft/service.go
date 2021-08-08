@@ -13,6 +13,7 @@ type RaftNode struct {
 	join     bool
 	kvport   int
 	clusters []string
+	newNode  bool
 
 	proc       chan string
 	confc      chan raftpb.ConfChange
@@ -33,8 +34,14 @@ func (r *RaftNode) RunRaftNode() {
 
 	kvs = newKVStore(<-snapshotterReady, r.proc, commitC, errorC)
 
-	if err := r.regist(); err != nil {
-		fmt.Println("something wrong while registing! ", err)
+	if r.newNode {
+		if err := r.regist(); err != nil {
+			fmt.Println("something wrong while registing! ", err)
+		}
+	} else {
+		if err := r.update(); err != nil {
+			fmt.Println("something wrong while registing! ", err)
+		}
 	}
 
 	// the key-value http handler will propose updates to raft
@@ -51,12 +58,13 @@ func (r *RaftNode) Close() {
 	close(r.confc) // confChangeC
 }
 
-func InitRaftNode(id int, kvport int, clusters []string, leaderaddr string, wt int) *RaftNode {
+func InitRaftNode(id int, kvport int, clusters []string, leaderaddr string, wt int, newnode bool) *RaftNode {
 	return &RaftNode{
 		id:         id,
 		kvport:     kvport,
 		clusters:   clusters,
 		join:       false,
+		newNode:    newnode,
 		proc:       make(chan string),
 		confc:      make(chan raftpb.ConfChange),
 		leaderaddr: leaderaddr,
@@ -72,6 +80,27 @@ func (r *RaftNode) regist() error {
 	peeraddr := r.clusters[r.id-1]
 	body := strings.NewReader(peeraddr)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%v/node/%d", r.leaderaddr, r.id), body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+func (r *RaftNode) update() error {
+	if r.id == 1 {
+		return nil
+	}
+
+	peeraddr := r.clusters[r.id-1]
+	body := strings.NewReader(peeraddr)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%v/node/%d", r.leaderaddr, r.id), body)
 	if err != nil {
 		return err
 	}

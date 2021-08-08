@@ -61,6 +61,26 @@ func AddNode(c *gin.Context) {
 	return
 }
 
+func UpdateNode(c *gin.Context) {
+	id := c.Param("nd")
+	iid, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	b, err := c.GetRawData()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	// TOOD: 判斷，如果收到的 raft 新增節點 id 與目前自身節點 id 相同，則不需要執行此步驟
+	raft.RetrieveKVApi().UpdateNode(uint64(iid), string(b))
+	c.JSON(http.StatusOK, "ok")
+	return
+}
+
 func DelNode(c *gin.Context) {
 	id := c.Param("nd")
 	iid, err := strconv.Atoi(id)

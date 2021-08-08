@@ -1,6 +1,10 @@
 package conf
 
 import (
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/go-ini/ini"
 )
 
@@ -39,5 +43,28 @@ func InitConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
+	if os.Getenv("k8s-env") != "" {
+		id, addr := k8sConfig()
+		Conf.ID = id
+		Conf.PeerAddr = addr
+	}
+
 	return Conf, nil
+}
+
+// unde k8s env, given some special parameters
+func k8sConfig() (int, string) {
+	h, err := os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+
+	id := strings.Split(h, "-")[1]
+
+	iid, err := strconv.Atoi(id)
+	if err != nil {
+		panic(err)
+	}
+
+	return iid, h
 }
