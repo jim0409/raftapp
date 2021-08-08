@@ -19,6 +19,8 @@ WORKDIR /app
 COPY --from=builder /go/src/raftapp/raftapp .
 # add app.dev.ini into Dockerfile
 RUN mkdir conf
+RUN mkdir data
+
 COPY ./conf/app.dev.ini ./conf/
 
 CMD ./raftapp

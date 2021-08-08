@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"go.etcd.io/etcd/raft/v3/raftpb"
 )
@@ -44,10 +43,10 @@ func (r *RaftNode) RunRaftNode() {
 
 func (r *RaftNode) Close() {
 	// may consider to unregistr ?
-	if err := r.unregist(); err != nil {
-		panic(err)
-	}
-	time.Sleep(time.Duration(r.wt) * time.Second)
+	// if err := r.unregist(); err != nil {
+	// 	panic(err)
+	// }
+	// time.Sleep(time.Duration(r.wt) * time.Second)
 	close(r.proc)  // prposeC
 	close(r.confc) // confChangeC
 }
