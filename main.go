@@ -85,15 +85,6 @@ func Init() error {
 		cfg.PeerAddr = fmt.Sprintf("http://%v:2379", localip)
 	}
 
-	// if cfg.ID != 0 {
-	// 	node, err := opdb.ReturnNodeInfo(cfg.ID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if cfg.HttpPort != node.Port || cfg.PeerAddr != node.Addr {
-	// 	}
-	// }
-
 	if cfg.ID == 0 {
 		aid, err := opdb.InsertDbRecord(cfg.HttpPort, cfg.PeerAddr)
 		if err != nil {

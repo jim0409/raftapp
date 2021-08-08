@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -46,7 +47,7 @@ func InitConfig(path string) (*Config, error) {
 	if os.Getenv("k8s-env") != "" {
 		id, addr := k8sConfig()
 		Conf.ID = id
-		Conf.PeerAddr = addr
+		Conf.PeerAddr = fmt.Sprintf("http://%v:2380", addr)
 	}
 
 	return Conf, nil
