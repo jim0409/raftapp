@@ -66,5 +66,6 @@ func k8sConfig() (int, string) {
 		panic(err)
 	}
 
-	return iid, h
+	// 因為 k8s stateful set 從 0 開始
+	return iid + 1, h
 }
