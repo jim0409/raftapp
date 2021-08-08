@@ -22,6 +22,10 @@ type RaftNode struct {
 }
 
 func (r *RaftNode) RunRaftNode() {
+	if len(r.clusters) > 1 {
+		r.join = true
+	}
+
 	var kvs *kvstore
 	getSnapshot := func() ([]byte, error) { return kvs.getSnapshot() }
 
@@ -30,20 +34,20 @@ func (r *RaftNode) RunRaftNode() {
 
 	kvs = newKVStore(<-snapshotterReady, r.proc, commitC, errorC)
 
-	if r.join {
-		r.regist()
+	if err := r.regist(); err != nil {
+		fmt.Println("something wrong while registing! ", err)
 	}
 
 	// the key-value http handler will propose updates to raft
-	// serveHttpKVAPI(kvs, r.kvport, r.confc, errorC)
 	InitKVAPI(kvs, r.kvport, r.confc, errorC)
 }
 
 func (r *RaftNode) Close() {
-	if r.join {
-		r.unregist() // may consider to unregistr ?
-		time.Sleep(time.Duration(r.wt) * time.Second)
+	// may consider to unregistr ?
+	if err := r.unregist(); err != nil {
+		panic(err)
 	}
+	time.Sleep(time.Duration(r.wt) * time.Second)
 	close(r.proc)  // prposeC
 	close(r.confc) // confChangeC
 }
@@ -61,30 +65,41 @@ func InitRaftNode(id int, kvport int, clusters []string, join bool, leaderaddr s
 	}
 }
 
-func (r *RaftNode) regist() {
-	peeradrr := r.clusters[len(r.clusters)-1]
-	body := strings.NewReader(peeradrr)
+func (r *RaftNode) regist() error {
+	if r.id == 1 {
+		return nil
+	}
+
+	peeraddr := r.clusters[r.id-1]
+	body := strings.NewReader(peeraddr)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%v/node/%d", r.leaderaddr, r.id), body)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer resp.Body.Close()
+	return nil
 }
 
-func (r *RaftNode) unregist() {
+func (r *RaftNode) unregist() error {
+	// id 1 still possible to leave
+	// if r.id == 1 {
+	// 	return nil
+	// }
+
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%v/node/%d", r.leaderaddr, r.id), nil)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer resp.Body.Close()
+	return nil
 }

@@ -14,6 +14,8 @@ type ImpNode interface {
 	ReturnNodes() (*[]Node, error)
 	GetClusterIps() ([]string, error)
 
+	DeleteRecord(int) error
+
 	ReturnNodeInfo(int) (*Node, error)
 }
 
@@ -67,4 +69,8 @@ func (db *Operation) GetClusterIps() ([]string, error) {
 	}
 
 	return urls, nil
+}
+
+func (db *Operation) DeleteRecord(id int) error {
+	return db.DB.Where(`id = ?`, id).Delete(&Node{}).Error
 }

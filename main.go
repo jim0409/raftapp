@@ -122,10 +122,6 @@ func Init() error {
 		return err
 	}
 
-	if len(clusters) > 1 {
-		join = true
-	}
-
 	raftnode = raft.InitRaftNode(cfg.ID, cfg.HttpPort, clusters, join, cfg.LeaderAddr, cfg.WaitToClose)
 
 	route := gin.Default()
