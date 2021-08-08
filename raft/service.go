@@ -22,7 +22,7 @@ type RaftNode struct {
 }
 
 func (r *RaftNode) RunRaftNode() {
-	if len(r.clusters) > 1 {
+	if r.id != 1 {
 		r.join = true
 	}
 
@@ -52,12 +52,12 @@ func (r *RaftNode) Close() {
 	close(r.confc) // confChangeC
 }
 
-func InitRaftNode(id int, kvport int, clusters []string, join bool, leaderaddr string, wt int) *RaftNode {
+func InitRaftNode(id int, kvport int, clusters []string, leaderaddr string, wt int) *RaftNode {
 	return &RaftNode{
 		id:         id,
 		kvport:     kvport,
 		clusters:   clusters,
-		join:       join,
+		join:       false,
 		proc:       make(chan string),
 		confc:      make(chan raftpb.ConfChange),
 		leaderaddr: leaderaddr,

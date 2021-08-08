@@ -58,7 +58,6 @@ func checkComimit() {
 
 func Init() error {
 	flag.Parse()
-	join := false
 
 	// if there is a needed to check git commit num ... print it out
 	if *checkcommit {
@@ -122,7 +121,7 @@ func Init() error {
 		return err
 	}
 
-	raftnode = raft.InitRaftNode(cfg.ID, cfg.HttpPort, clusters, join, cfg.LeaderAddr, cfg.WaitToClose)
+	raftnode = raft.InitRaftNode(cfg.ID, cfg.HttpPort, clusters, cfg.LeaderAddr, cfg.WaitToClose)
 
 	route := gin.Default()
 	router.ApiRouter(route)
